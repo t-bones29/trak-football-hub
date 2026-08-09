@@ -38,5 +38,6 @@ build/
 Thumbs.db
 
 # Claude
-.claude/
+.claude/*
+!.claude/agents/
 test-results/
