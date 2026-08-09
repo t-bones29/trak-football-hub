@@ -1,0 +1,128 @@
+<title>Player — Session Feedback</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=DM+Mono:wght@400;500&display=swap');
+  :root{
+    --bg:#0A0A0B; --card:#101012; --card-elevated:#17171A; --border:rgba(255,255,255,0.07);
+    --t1:rgba(255,255,255,0.88); --t2:rgba(255,255,255,0.45); --t3:rgba(255,255,255,0.22);
+    --lime:#C8F25A; --lime-bg:rgba(200,242,90,0.10); --lime-border:rgba(200,242,90,0.30);
+    --good:#4ade80;
+  }
+  *{box-sizing:border-box;}
+  body{background:var(--bg); font-family:'DM Sans',sans-serif; color:var(--t1); margin:0; display:flex; justify-content:center;}
+  .shell{width:430px; max-width:100%; min-height:100vh; background:var(--bg); padding:0 20px 40px; position:relative;}
+
+  .topbar{display:flex; align-items:center; justify-content:space-between; padding:14px 0 2px;}
+  .backbtn{width:34px;height:34px;background:var(--card-elevated);border:1px solid rgba(255,255,255,0.11);border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--t1);}
+  .topbar-title{font-size:16px; font-weight:500; color:var(--t1);}
+
+  .type-chip{display:inline-flex; align-items:center; gap:6px; padding:5px 11px; border-radius:999px; font-family:'DM Mono',monospace; font-size:9px; letter-spacing:0.1em; text-transform:uppercase; background:var(--lime-bg); color:var(--lime); border:1px solid var(--lime-border); margin-top:18px;}
+  .dot{width:6px;height:6px;border-radius:50%; background:currentColor;}
+
+  .session-title{font-size:20px; font-weight:400; color:var(--t1); margin:12px 0 4px; letter-spacing:-0.02em;}
+  .session-meta{font-family:'DM Mono',monospace; font-size:10px; color:var(--t3); letter-spacing:0.04em;}
+
+  .coach-row{display:flex; align-items:center; gap:10px; margin-top:20px;}
+  .avatar{width:36px; height:36px; border-radius:11px; background:rgba(200,242,90,0.14); display:flex; align-items:center; justify-content:center; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600; color:var(--lime); flex-shrink:0;}
+  .coach-name{font-size:13px; font-weight:500; color:var(--t1); margin:0;}
+  .coach-role{font-family:'DM Mono',monospace; font-size:9px; color:var(--t3); margin:2px 0 0; letter-spacing:0.04em;}
+
+  .note-card{border-radius:18px; padding:18px; margin-top:16px; background:rgba(200,242,90,0.06); border:1px solid rgba(200,242,90,0.18); position:relative; overflow:hidden;}
+  .note-glow{position:absolute; bottom:-40px; right:-40px; width:160px; height:160px; border-radius:50%; background:radial-gradient(circle, rgba(200,242,90,0.08) 0%, transparent 70%); pointer-events:none;}
+  .note-label{font-family:'DM Mono',monospace; font-size:9px; letter-spacing:0.12em; text-transform:uppercase; color:rgba(200,242,90,0.6); position:relative; z-index:1;}
+  .note-body{font-size:14px; color:var(--t1); line-height:1.6; margin:10px 0 0; position:relative; z-index:1;}
+
+  .rating-row{display:flex; align-items:center; justify-content:space-between; margin-top:16px; padding:14px 16px; border-radius:14px; background:var(--card); border:1px solid var(--border);}
+  .rating-label{font-family:'DM Mono',monospace; font-size:9px; letter-spacing:0.1em; text-transform:uppercase; color:var(--t2);}
+  .band-pill{display:inline-flex; align-items:center; padding:5px 12px; font-size:12px; border-radius:999px; font-family:'DM Sans',sans-serif; letter-spacing:-0.02em;}
+
+  .attendance-row{display:flex; align-items:center; gap:8px; margin-top:14px; padding:12px 14px; border-radius:12px; background:rgba(0,0,0,0.3);}
+  .check-dot{width:18px;height:18px;border-radius:50%; background:var(--lime); display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; color:#000; flex-shrink:0;}
+  .attendance-text{font-size:12px; color:var(--t2);}
+
+  .card{border-radius:16px; padding:16px; border:1px solid var(--border); background:var(--card); margin-top:16px;}
+  .label{font-family:'DM Mono',monospace; font-size:9px; font-weight:500; letter-spacing:0.12em; text-transform:uppercase; color:var(--t2);}
+  .drill-line{display:flex; align-items:center; gap:8px; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05); font-size:13px; color:var(--t1);}
+  .drill-line:last-child{border-bottom:none;}
+  .drill-dot{width:5px;height:5px;border-radius:50%; background:var(--lime); flex-shrink:0;}
+
+  .cta-btn{width:100%; padding:14px; border-radius:12px; border:none; font-size:14px; font-weight:500; cursor:pointer; background:var(--lime); color:#000; font-family:'DM Sans',sans-serif; margin-top:20px;}
+
+  .other-sessions{margin-top:24px;}
+  .other-row{display:flex; align-items:center; justify-content:space-between; padding:12px 0; border-bottom:1px solid rgba(255,255,255,0.05);}
+  .other-row:last-child{border-bottom:none;}
+  .other-title{font-size:12px; color:var(--t2); margin:0;}
+  .other-meta{font-family:'DM Mono',monospace; font-size:9px; color:var(--t3); margin:3px 0 0;}
+  .arrow{color:var(--t3); font-size:13px;}
+</style>
+
+<div class="shell">
+  <div class="topbar">
+    <button class="backbtn">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <span class="topbar-title">Session Feedback</span>
+    <div style="width:34px;"></div>
+  </div>
+
+  <span class="type-chip"><span class="dot"></span>Training</span>
+  <p class="session-title">Tactical / Finishing Training</p>
+  <p class="session-meta">TUE 12 AUG · City FC Training Ground</p>
+
+  <div class="coach-row">
+    <div class="avatar">AM</div>
+    <div>
+      <p class="coach-name">Alex Martinez</p>
+      <p class="coach-role">Head Coach · City FC Academy U15s</p>
+    </div>
+  </div>
+
+  <div class="note-card">
+    <div class="note-glow"></div>
+    <p class="note-label">FEEDBACK FOR YOU</p>
+    <p class="note-body">
+      Really sharp in the pressing rondo tonight, Jamie — your first step when the trigger fires is
+      quicker than it was a month ago. In the finishing circuit, slow down your set-up touch inside
+      the box — you rushed two low-percentage shots when a second touch would've opened the far
+      corner. Keep working the near-post movement we drilled; it's close.
+    </p>
+  </div>
+
+  <div class="rating-row">
+    <span class="rating-label">SESSION RATING</span>
+    <span class="band-pill" style="color:#4ade80; background:rgba(74,222,128,0.13); border:1px solid rgba(74,222,128,0.24);">Good</span>
+  </div>
+
+  <div class="attendance-row">
+    <div class="check-dot">✓</div>
+    <span class="attendance-text">Marked present · attended full session</span>
+  </div>
+
+  <div class="card">
+    <span class="label">WHAT YOU TRAINED</span>
+    <div style="margin-top:8px;">
+      <div class="drill-line"><span class="drill-dot"></span>Pressing triggers — 4v2 rondo</div>
+      <div class="drill-line"><span class="drill-dot"></span>Box finishing circuit</div>
+      <div class="drill-line"><span class="drill-dot"></span>8v8 small-sided game</div>
+    </div>
+  </div>
+
+  <button class="cta-btn">Got it, thanks</button>
+
+  <div class="other-sessions">
+    <span class="label">OTHER RECENT SESSIONS</span>
+    <div class="other-row">
+      <div>
+        <p class="other-title">Possession Training</p>
+        <p class="other-meta">FRI 8 AUG</p>
+      </div>
+      <span class="arrow">→</span>
+    </div>
+    <div class="other-row">
+      <div>
+        <p class="other-title">vs North Academy</p>
+        <p class="other-meta">SAT 2 AUG · League</p>
+      </div>
+      <span class="arrow">→</span>
+    </div>
+  </div>
+</div>

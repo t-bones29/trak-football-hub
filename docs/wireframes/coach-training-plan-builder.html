@@ -1,0 +1,210 @@
+<title>Coach — Training Plan Builder</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=DM+Mono:wght@400;500&display=swap');
+  :root{
+    --bg:#0A0A0B; --card:#101012; --card-elevated:#17171A; --border:rgba(255,255,255,0.07);
+    --t1:rgba(255,255,255,0.88); --t2:rgba(255,255,255,0.45); --t3:rgba(255,255,255,0.22);
+    --lime:#C8F25A; --lime-bg:rgba(200,242,90,0.10); --lime-border:rgba(200,242,90,0.30);
+    --training:#C8F25A; --match:#fbbf24; --tournament:#c084fc;
+  }
+  *{box-sizing:border-box;}
+  body{background:var(--bg); font-family:'DM Sans',sans-serif; color:var(--t1); margin:0; display:flex; justify-content:center;}
+  .shell{width:430px; max-width:100%; min-height:100vh; background:var(--bg); padding:0 20px 96px; position:relative;}
+  .topbar{display:flex; align-items:center; justify-content:space-between; padding:14px 0 10px; border-bottom:1px solid var(--border);}
+  .backbtn{width:34px;height:34px;background:var(--card-elevated);border:1px solid rgba(255,255,255,0.11);border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--t1);cursor:pointer;}
+  .topbar-title{font-size:16px; font-weight:500; color:var(--t1);}
+  .steps{display:flex; align-items:center; gap:6px; margin-top:14px;}
+  .step{font-family:'DM Mono',monospace; font-size:9px; letter-spacing:0.12em; text-transform:uppercase; padding:5px 10px; border-radius:20px;}
+  .step.active{background:var(--lime-bg); color:var(--lime); border:1px solid var(--lime-border);}
+  .step.pending{background:rgba(255,255,255,0.04); color:var(--t3); border:1px solid var(--border);}
+  .step-arrow{color:var(--t3); font-size:11px;}
+
+  .label{font-family:'DM Mono',monospace; font-size:9px; font-weight:500; letter-spacing:0.12em; text-transform:uppercase; color:var(--t2);}
+  .card{border-radius:18px; padding:16px; border:1px solid var(--border); background:var(--card); margin-top:16px;}
+
+  .badge-row{display:flex; gap:8px; margin-top:10px;}
+  .type-chip{padding:6px 12px; border-radius:999px; font-size:12px; border:1px solid var(--lime-border); background:var(--lime-bg); color:var(--lime); font-family:'DM Sans',sans-serif; display:inline-flex; align-items:center; gap:6px;}
+  .dot{width:6px;height:6px;border-radius:50%; background:var(--training);}
+
+  .focus-grid{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px;}
+  .focus-tile{text-align:left; padding:10px 12px; border-radius:12px; cursor:pointer; transition:all .15s;}
+  .focus-tile.on{background:var(--lime-bg); border:1px solid var(--lime-border);}
+  .focus-tile.off{background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.06);}
+  .focus-title{font-size:13px; font-weight:500; margin:0;}
+  .focus-tile.on .focus-title{color:var(--lime);}
+  .focus-tile.off .focus-title{color:rgba(255,255,255,0.78);}
+  .focus-sub{font-family:'DM Mono',monospace; font-size:9px; color:var(--t3); margin:3px 0 0; letter-spacing:0.04em;}
+
+  .chip-row{display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;}
+  .chip{padding:6px 12px; border-radius:999px; font-size:12px; cursor:pointer; font-family:'DM Sans',sans-serif; border:1px solid var(--border); background:#202024; color:var(--t2);}
+  .chip.on{background:var(--lime-bg); color:var(--lime); border-color:var(--lime-border);}
+
+  .drill-header{display:flex; align-items:center; justify-content:space-between; margin-top:16px;}
+  .drill-count{font-family:'DM Mono',monospace; font-size:9px; letter-spacing:0.14em; text-transform:uppercase; color:var(--t2);}
+  .add-drill-btn{font-family:'DM Mono',monospace; font-size:10px; letter-spacing:0.12em; text-transform:uppercase; color:var(--lime); background:none; border:none; cursor:pointer;}
+
+  .drill-list{margin-top:10px; display:flex; flex-direction:column; gap:8px;}
+  .drill-card{display:flex; align-items:flex-start; gap:12px; padding:12px; border-radius:14px; cursor:pointer; transition:all .15s;}
+  .drill-card.on{background:var(--lime-bg); border:1px solid var(--lime-border);}
+  .drill-card.off{background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.06);}
+  .check{flex-shrink:0; width:20px;height:20px;border-radius:50%; border:1px solid rgba(255,255,255,0.2); margin-top:2px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700;}
+  .drill-card.on .check{background:var(--lime); border-color:var(--lime); color:#000;}
+  .drill-body{flex:1; min-width:0;}
+  .drill-title{font-size:13px; font-weight:500; margin:0; color:var(--t1);}
+  .drill-meta{font-family:'DM Mono',monospace; font-size:9px; color:var(--t3); margin:4px 0 0; letter-spacing:0.05em;}
+  .drill-focus-tag{display:inline-block; font-family:'DM Mono',monospace; font-size:8px; letter-spacing:0.08em; text-transform:uppercase; color:var(--t2); background:rgba(255,255,255,0.05); border-radius:999px; padding:2px 8px; margin-top:6px;}
+
+  .custom-drill-row{display:flex; gap:8px; margin-top:10px;}
+  .custom-drill-row input{flex:1; background:rgba(0,0,0,0.35); border:1px solid var(--border); border-radius:10px; padding:10px 12px; color:var(--t1); font-family:'DM Sans',sans-serif; font-size:13px; outline:none;}
+  .custom-drill-row button{flex-shrink:0; background:var(--card-elevated); border:1px solid rgba(255,255,255,0.11); border-radius:10px; padding:0 16px; color:var(--lime); font-family:'DM Sans',sans-serif; font-size:13px; cursor:pointer;}
+
+  textarea{width:100%; background:transparent; border:none; outline:none; resize:none; color:var(--t1); font-family:'DM Sans',sans-serif; font-size:14px; margin-top:8px;}
+  textarea::placeholder{color:rgba(255,255,255,0.2);}
+
+  .summary-row{display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.05);}
+  .summary-row:last-child{border-bottom:none;}
+  .summary-k{font-family:'DM Mono',monospace; font-size:9px; letter-spacing:0.1em; text-transform:uppercase; color:var(--t3);}
+  .summary-v{font-size:13px; color:var(--t1); text-align:right;}
+
+  .sticky-cta{position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:430px; max-width:100%; padding:12px 20px 20px; background:linear-gradient(180deg, rgba(10,10,11,0) 0%, #0A0A0B 35%);}
+  .cta-btn{width:100%; padding:14px; border-radius:12px; border:none; font-size:14px; font-weight:500; cursor:pointer; background:var(--lime); color:#000; font-family:'DM Sans',sans-serif;}
+  .cta-sub{text-align:center; font-family:'DM Mono',monospace; font-size:9px; color:var(--t3); margin-top:8px; letter-spacing:0.04em;}
+</style>
+
+<div class="shell">
+  <div class="topbar">
+    <button class="backbtn">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <span class="topbar-title">Training Plan</span>
+    <div style="width:34px;"></div>
+  </div>
+
+  <div class="steps">
+    <span class="step active">1 · Plan</span>
+    <span class="step-arrow">→</span>
+    <span class="step pending">2 · Schedule</span>
+  </div>
+
+  <!-- Session type context -->
+  <div class="card">
+    <span class="label">SESSION TYPE</span>
+    <div class="badge-row">
+      <span class="type-chip"><span class="dot"></span>Training</span>
+    </div>
+    <p style="font-family:'DM Mono',monospace; font-size:9px; color:var(--t3); margin-top:10px; letter-spacing:0.04em;">
+      For City FC Academy U15s · same flow as Add Session, extended with a plan step
+    </p>
+  </div>
+
+  <!-- Objective -->
+  <div class="card">
+    <span class="label">OBJECTIVE</span>
+    <input value="Sharpen pressing triggers &amp; finishing in the box" style="width:100%; background:transparent; border:none; outline:none; color:var(--t1); font-family:'DM Sans',sans-serif; font-size:15px; margin-top:8px;" placeholder="What should this session achieve?" />
+  </div>
+
+  <!-- Session focus (existing pattern, reused) -->
+  <div class="card">
+    <span class="label">SESSION FOCUS</span>
+    <div class="focus-grid">
+      <div class="focus-tile off"><p class="focus-title">Technical</p><p class="focus-sub">Passing, control, dribbling</p></div>
+      <div class="focus-tile on"><p class="focus-title">Tactical</p><p class="focus-sub">Shape, pressing, transitions</p></div>
+      <div class="focus-tile on"><p class="focus-title">Finishing</p><p class="focus-sub">Shooting &amp; scoring</p></div>
+      <div class="focus-tile off"><p class="focus-title">Set Pieces</p><p class="focus-sub">Corners, free kicks, penalties</p></div>
+      <div class="focus-tile off"><p class="focus-title">Physical</p><p class="focus-sub">Fitness &amp; conditioning</p></div>
+      <div class="focus-tile off"><p class="focus-title">Possession</p><p class="focus-sub">Rondos, keep-ball</p></div>
+    </div>
+  </div>
+
+  <!-- Duration (existing pattern, reused) -->
+  <div class="card">
+    <span class="label">DURATION</span>
+    <div class="chip-row">
+      <span class="chip">45 min</span>
+      <span class="chip on">60 min</span>
+      <span class="chip">75 min</span>
+      <span class="chip">90 min</span>
+    </div>
+  </div>
+
+  <!-- Drill picker — NEW pattern, extends the focus-tile chip visual -->
+  <div class="card">
+    <div class="drill-header">
+      <span class="label" style="margin:0;">DRILLS · 3 SELECTED</span>
+      <span class="drill-count" style="color:var(--lime); font-family:'DM Mono',monospace; letter-spacing:0.12em;">from library</span>
+    </div>
+
+    <div class="drill-list">
+      <div class="drill-card on">
+        <div class="check">✓</div>
+        <div class="drill-body">
+          <p class="drill-title">Pressing triggers — 4v2 rondo</p>
+          <p class="drill-meta">15 min · high intensity</p>
+          <span class="drill-focus-tag">Tactical</span>
+        </div>
+      </div>
+      <div class="drill-card on">
+        <div class="check">✓</div>
+        <div class="drill-body">
+          <p class="drill-title">Box finishing circuit</p>
+          <p class="drill-meta">15 min · 5 stations</p>
+          <span class="drill-focus-tag">Finishing</span>
+        </div>
+      </div>
+      <div class="drill-card on">
+        <div class="check">✓</div>
+        <div class="drill-body">
+          <p class="drill-title">8v8 small-sided game — press to win, finish quick</p>
+          <p class="drill-meta">20 min · conditioned game</p>
+          <span class="drill-focus-tag">Tactical</span>
+        </div>
+      </div>
+      <div class="drill-card off">
+        <div class="check"></div>
+        <div class="drill-body">
+          <p class="drill-title">Crossing &amp; near-post runs</p>
+          <p class="drill-meta">15 min · wide players focus</p>
+          <span class="drill-focus-tag">Finishing</span>
+        </div>
+      </div>
+      <div class="drill-card off">
+        <div class="check"></div>
+        <div class="drill-body">
+          <p class="drill-title">Set-piece routines — corners</p>
+          <p class="drill-meta">10 min · dead-ball work</p>
+          <span class="drill-focus-tag">Set Pieces</span>
+        </div>
+      </div>
+    </div>
+
+    <span class="label" style="display:block; margin-top:16px;">AUTHOR A DRILL</span>
+    <div class="custom-drill-row">
+      <input placeholder="e.g. Overload to underload transition" />
+      <button>Add</button>
+    </div>
+  </div>
+
+  <!-- Notes -->
+  <div class="card">
+    <span class="label">COACH NOTES</span>
+    <textarea rows="3" placeholder="Anything the squad should know before the session…">Bring shin pads — full-contact SSG at the end. Meet 15 min early for the pressing walkthrough.</textarea>
+  </div>
+
+  <!-- Plan summary -->
+  <div class="card">
+    <span class="label">PLAN SUMMARY</span>
+    <div style="margin-top:6px;">
+      <div class="summary-row"><span class="summary-k">DURATION</span><span class="summary-v">60 min</span></div>
+      <div class="summary-row"><span class="summary-k">FOCUS</span><span class="summary-v">Tactical, Finishing</span></div>
+      <div class="summary-row"><span class="summary-k">DRILLS</span><span class="summary-v">3 attached</span></div>
+      <div class="summary-row"><span class="summary-k">SQUAD</span><span class="summary-v">City FC Academy U15s</span></div>
+    </div>
+  </div>
+
+  <div style="height:100px;"></div>
+
+  <div class="sticky-cta">
+    <button class="cta-btn">Continue to schedule →</button>
+    <p class="cta-sub">Next: pick date, time &amp; venue — then push to squad</p>
+  </div>
+</div>

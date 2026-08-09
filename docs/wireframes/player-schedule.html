@@ -1,0 +1,242 @@
+<title>Player — Schedule</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=DM+Mono:wght@400;500&display=swap');
+  :root{
+    --bg:#0A0A0B; --card:#101012; --card-elevated:#17171A; --border:rgba(255,255,255,0.07);
+    --t1:rgba(255,255,255,0.88); --t2:rgba(255,255,255,0.45); --t3:rgba(255,255,255,0.22);
+    --lime:#C8F25A; --lime-bg:rgba(200,242,90,0.10); --lime-border:rgba(200,242,90,0.30);
+    --training:#C8F25A; --match:#fbbf24; --tournament:#c084fc; --red:#ef4444;
+  }
+  *{box-sizing:border-box;}
+  body{background:var(--bg); font-family:'DM Sans',sans-serif; color:var(--t1); margin:0; display:flex; justify-content:center;}
+  .shell{width:430px; max-width:100%; min-height:100vh; background:var(--bg); padding:0 20px 100px; position:relative;}
+
+  .header{padding-top:12px; padding-bottom:4px;}
+  .eyebrow{font-family:'DM Mono',monospace; font-size:9px; letter-spacing:0.12em; text-transform:uppercase; color:var(--t3); margin:0 0 2px;}
+  .h1{font-size:22px; font-weight:300; color:var(--t1); margin:0; letter-spacing:-0.02em;}
+  .count{font-family:'DM Mono',monospace; font-size:10px; color:var(--t3);}
+  .header-row{display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:14px;}
+
+  .filter-row{display:flex; gap:8px; margin-bottom:14px;}
+  .filter-chip{padding:6px 12px; border-radius:999px; font-size:11px; font-family:'DM Mono',monospace; border:1px solid var(--border); background:rgba(255,255,255,0.04); color:var(--t2); cursor:pointer;}
+  .filter-chip.on{background:var(--lime-bg); border-color:var(--lime-border); color:var(--lime);}
+
+  .session-card{display:flex; align-items:center; gap:12px; padding:14px; border-radius:14px; background:var(--card); border:1px solid var(--border); margin-bottom:8px; cursor:pointer;}
+  .bar{width:4px; align-self:stretch; border-radius:4px; flex-shrink:0; min-height:44px;}
+  .bar.training{background:var(--training);}
+  .bar.match{background:var(--match);}
+  .sc-body{flex:1; min-width:0;}
+  .sc-title{font-size:13px; font-weight:500; margin:0; color:var(--t1);}
+  .sc-meta{font-family:'DM Mono',monospace; font-size:9px; color:var(--t3); margin:5px 0 0; letter-spacing:0.05em;}
+  .rsvp-tag{flex-shrink:0; font-family:'DM Mono',monospace; font-size:9px; letter-spacing:0.08em; text-transform:uppercase; padding:4px 9px; border-radius:999px; white-space:nowrap;}
+  .rsvp-going{background:var(--lime-bg); color:var(--lime); border:1px solid var(--lime-border);}
+  .rsvp-out{background:rgba(239,68,68,0.10); color:var(--red); border:1px solid rgba(239,68,68,0.25);}
+  .rsvp-pending{background:rgba(255,255,255,0.05); color:var(--t2); border:1px solid var(--border);}
+
+  .section-gap{margin-top:22px;}
+
+  /* Detail sheet */
+  .overlay{position:fixed; inset:0; background:rgba(0,0,0,0.6); display:none; z-index:40; justify-content:center;}
+  .overlay.show{display:flex;}
+  .sheet{width:430px; max-width:100%; background:var(--bg); position:absolute; bottom:0; left:50%; transform:translateX(-50%); border-radius:24px 24px 0 0; padding:20px 20px 28px; max-height:88vh; overflow-y:auto; border-top:1px solid var(--border);}
+  .sheet-handle{width:36px; height:4px; background:rgba(255,255,255,0.15); border-radius:4px; margin:0 auto 16px;}
+  .sheet-close{position:absolute; top:20px; right:20px; width:28px; height:28px; border-radius:8px; background:var(--card-elevated); border:1px solid rgba(255,255,255,0.11); display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--t2); font-size:13px;}
+
+  .type-chip{display:inline-flex; align-items:center; gap:6px; padding:5px 11px; border-radius:999px; font-family:'DM Mono',monospace; font-size:9px; letter-spacing:0.1em; text-transform:uppercase;}
+  .type-chip.training{background:var(--lime-bg); color:var(--lime); border:1px solid var(--lime-border);}
+  .type-chip.match{background:rgba(251,191,36,0.10); color:var(--match); border:1px solid rgba(251,191,36,0.28);}
+  .dot{width:6px;height:6px;border-radius:50%; background:currentColor;}
+
+  .detail-title{font-size:20px; font-weight:400; color:var(--t1); margin:12px 0 4px; letter-spacing:-0.02em;}
+  .detail-meta{font-family:'DM Mono',monospace; font-size:11px; color:var(--t3); letter-spacing:0.04em;}
+
+  .info-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:18px;}
+  .info-cell{background:rgba(0,0,0,0.35); border-radius:12px; padding:12px;}
+  .info-k{font-family:'DM Mono',monospace; font-size:8px; letter-spacing:0.1em; text-transform:uppercase; color:var(--t3); margin:0 0 4px;}
+  .info-v{font-size:13px; color:var(--t1); margin:0;}
+
+  .card{border-radius:16px; padding:16px; border:1px solid var(--border); background:var(--card); margin-top:16px;}
+  .label{font-family:'DM Mono',monospace; font-size:9px; font-weight:500; letter-spacing:0.12em; text-transform:uppercase; color:var(--t2);}
+  .focus-tags{display:flex; gap:6px; margin-top:10px; flex-wrap:wrap;}
+  .focus-tag{font-family:'DM Mono',monospace; font-size:9px; letter-spacing:0.06em; text-transform:uppercase; color:var(--t2); background:rgba(255,255,255,0.05); padding:4px 10px; border-radius:999px;}
+  .drill-line{display:flex; align-items:center; gap:8px; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05); font-size:13px; color:var(--t1);}
+  .drill-line:last-child{border-bottom:none;}
+  .drill-dot{width:5px;height:5px;border-radius:50%; background:var(--lime); flex-shrink:0;}
+
+  .rsvp-block{margin-top:20px;}
+  .rsvp-title{font-size:13px; color:var(--t2); margin:0 0 10px;}
+  .rsvp-btns{display:flex; gap:10px;}
+  .rsvp-btn{flex:1; padding:14px; border-radius:12px; font-size:13px; font-weight:500; cursor:pointer; text-align:center; font-family:'DM Sans',sans-serif; transition:all .15s;}
+  .rsvp-btn.going{background:var(--lime); color:#000; border:1px solid var(--lime);}
+  .rsvp-btn.going.off{background:rgba(200,242,90,0.08); color:var(--lime); border:1px solid var(--lime-border);}
+  .rsvp-btn.out{background:rgba(239,68,68,0.10); color:var(--red); border:1px solid rgba(239,68,68,0.25);}
+  .rsvp-btn.out.on{background:var(--red); color:#fff; border:1px solid var(--red);}
+  .rsvp-confirmed{margin-top:10px; text-align:center; font-family:'DM Mono',monospace; font-size:10px; color:var(--t3); letter-spacing:0.04em;}
+</style>
+
+<div class="shell">
+  <!-- Bottom nav — matches NavBar visual language; Schedule not yet a 5th tab (see trade-off note) -->
+  <div class="header">
+    <p class="eyebrow">Player</p>
+    <div class="header-row">
+      <h1 class="h1">Schedule</h1>
+      <span class="count">3 upcoming</span>
+    </div>
+  </div>
+
+  <div class="filter-row">
+    <span class="filter-chip on">All</span>
+    <span class="filter-chip">Training</span>
+    <span class="filter-chip">Matches</span>
+  </div>
+
+  <div class="session-card" onclick="openSheet('training1')">
+    <div class="bar training"></div>
+    <div class="sc-body">
+      <p class="sc-title">Tactical / Finishing Training</p>
+      <p class="sc-meta">TUE 12 AUG · 18:00 · City FC Training Ground</p>
+    </div>
+    <span class="rsvp-tag rsvp-pending">Respond</span>
+  </div>
+
+  <div class="session-card" onclick="openSheet('match1')">
+    <div class="bar match"></div>
+    <div class="sc-body">
+      <p class="sc-title">vs Riverside United</p>
+      <p class="sc-meta">SAT 16 AUG · 10:00 · Home · League</p>
+    </div>
+    <span class="rsvp-tag rsvp-going">Going</span>
+  </div>
+
+  <div class="session-card" onclick="openSheet('training2')">
+    <div class="bar training"></div>
+    <div class="sc-body">
+      <p class="sc-title">Set Pieces Training</p>
+      <p class="sc-meta">THU 21 AUG · 18:00 · City FC Training Ground</p>
+    </div>
+    <span class="rsvp-tag rsvp-out">Can't make it</span>
+  </div>
+
+  <div class="section-gap">
+    <span class="label">PAST</span>
+    <div class="session-card" style="opacity:0.5; margin-top:10px; cursor:default;">
+      <div class="bar training"></div>
+      <div class="sc-body">
+        <p class="sc-title">Possession Training</p>
+        <p class="sc-meta">FRI 8 AUG · 18:00 · City FC Training Ground</p>
+      </div>
+      <span class="rsvp-tag rsvp-going">Attended</span>
+    </div>
+  </div>
+</div>
+
+<!-- Detail sheet: Training session -->
+<div class="overlay" id="sheet-training1">
+  <div class="sheet">
+    <button class="sheet-close" onclick="closeSheet('training1')">✕</button>
+    <div class="sheet-handle"></div>
+    <span class="type-chip training"><span class="dot"></span>Training</span>
+    <p class="detail-title">Tactical / Finishing Training</p>
+    <p class="detail-meta">Tuesday 12 August · 18:00–19:00</p>
+
+    <div class="info-grid">
+      <div class="info-cell"><p class="info-k">Venue</p><p class="info-v">City FC Training Ground</p></div>
+      <div class="info-cell"><p class="info-k">Duration</p><p class="info-v">60 min</p></div>
+      <div class="info-cell"><p class="info-k">Coach</p><p class="info-v">Alex Martinez</p></div>
+      <div class="info-cell"><p class="info-k">Squad</p><p class="info-v">City FC Academy U15s</p></div>
+    </div>
+
+    <div class="card">
+      <span class="label">FOCUS</span>
+      <div class="focus-tags">
+        <span class="focus-tag">Tactical</span>
+        <span class="focus-tag">Finishing</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <span class="label">PLAN</span>
+      <div style="margin-top:8px;">
+        <div class="drill-line"><span class="drill-dot"></span>Pressing triggers — 4v2 rondo</div>
+        <div class="drill-line"><span class="drill-dot"></span>Box finishing circuit</div>
+        <div class="drill-line"><span class="drill-dot"></span>8v8 small-sided game</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <span class="label">FROM YOUR COACH</span>
+      <p style="font-size:13px; color:var(--t1); margin:8px 0 0; line-height:1.5;">Bring shin pads — full-contact SSG at the end. Meet 15 min early for the pressing walkthrough.</p>
+    </div>
+
+    <div class="rsvp-block">
+      <p class="rsvp-title">Will you be there?</p>
+      <div class="rsvp-btns">
+        <div class="rsvp-btn going off">Going</div>
+        <div class="rsvp-btn out">Can't make it</div>
+      </div>
+      <p class="rsvp-confirmed">No response yet — let your coach know</p>
+    </div>
+  </div>
+</div>
+
+<!-- Detail sheet: Match -->
+<div class="overlay" id="sheet-match1">
+  <div class="sheet">
+    <button class="sheet-close" onclick="closeSheet('match1')">✕</button>
+    <div class="sheet-handle"></div>
+    <span class="type-chip match"><span class="dot"></span>Match</span>
+    <p class="detail-title">vs Riverside United</p>
+    <p class="detail-meta">Saturday 16 August · 10:00 kick-off</p>
+
+    <div class="info-grid">
+      <div class="info-cell"><p class="info-k">Venue</p><p class="info-v">Home</p></div>
+      <div class="info-cell"><p class="info-k">Competition</p><p class="info-v">League</p></div>
+      <div class="info-cell"><p class="info-k">Coach</p><p class="info-v">Alex Martinez</p></div>
+      <div class="info-cell"><p class="info-k">Squad</p><p class="info-v">City FC Academy U15s</p></div>
+    </div>
+
+    <div class="rsvp-block">
+      <p class="rsvp-title">Will you be there?</p>
+      <div class="rsvp-btns">
+        <div class="rsvp-btn going">Going</div>
+        <div class="rsvp-btn out off">Can't make it</div>
+      </div>
+      <p class="rsvp-confirmed">You're marked as Going — see you Saturday</p>
+    </div>
+  </div>
+</div>
+
+<!-- Detail sheet: Training (declined) -->
+<div class="overlay" id="sheet-training2">
+  <div class="sheet">
+    <button class="sheet-close" onclick="closeSheet('training2')">✕</button>
+    <div class="sheet-handle"></div>
+    <span class="type-chip training"><span class="dot"></span>Training</span>
+    <p class="detail-title">Set Pieces Training</p>
+    <p class="detail-meta">Thursday 21 August · 18:00–19:00</p>
+
+    <div class="info-grid">
+      <div class="info-cell"><p class="info-k">Venue</p><p class="info-v">City FC Training Ground</p></div>
+      <div class="info-cell"><p class="info-k">Duration</p><p class="info-v">60 min</p></div>
+      <div class="info-cell"><p class="info-k">Coach</p><p class="info-v">Alex Martinez</p></div>
+      <div class="info-cell"><p class="info-k">Squad</p><p class="info-v">City FC Academy U15s</p></div>
+    </div>
+
+    <div class="rsvp-block">
+      <p class="rsvp-title">Will you be there?</p>
+      <div class="rsvp-btns">
+        <div class="rsvp-btn going off">Going</div>
+        <div class="rsvp-btn out on">Can't make it</div>
+      </div>
+      <p class="rsvp-confirmed">You're marked as Can't make it</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  function openSheet(id){ document.getElementById('sheet-'+id).classList.add('show'); }
+  function closeSheet(id){ document.getElementById('sheet-'+id).classList.remove('show'); }
+  document.querySelectorAll('.overlay').forEach(o => {
+    o.addEventListener('click', e => { if(e.target === o) o.classList.remove('show'); });
+  });
+</script>

@@ -1,0 +1,196 @@
+<title>Coach — Session Run · Attendance</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=DM+Mono:wght@400;500&display=swap');
+  :root{
+    --bg:#0A0A0B; --card:#101012; --card-elevated:#17171A; --border:rgba(255,255,255,0.07);
+    --t1:rgba(255,255,255,0.88); --t2:rgba(255,255,255,0.45); --t3:rgba(255,255,255,0.22);
+    --lime:#C8F25A; --lime-bg:rgba(200,242,90,0.10); --lime-border:rgba(200,242,90,0.30);
+    --red:#ef4444;
+  }
+  *{box-sizing:border-box;}
+  body{background:var(--bg); font-family:'DM Sans',sans-serif; color:var(--t1); margin:0; display:flex; justify-content:center;}
+  .shell{width:430px; max-width:100%; min-height:100vh; background:var(--bg); padding:0 20px 110px; position:relative;}
+
+  .topbar{display:flex; align-items:center; gap:12px; padding:14px 0 2px;}
+  .backbtn{width:34px;height:34px;background:var(--card-elevated);border:1px solid rgba(255,255,255,0.11);border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--t1); flex-shrink:0;}
+  .topbar-title{font-size:20px; font-weight:400; color:var(--t1);}
+
+  .label{font-family:'DM Mono',monospace; font-size:9px; font-weight:500; letter-spacing:0.12em; text-transform:uppercase; color:var(--t2);}
+
+  .session-card{border-radius:16px; padding:16px; border:1px solid var(--border); background:var(--card); margin-top:16px;}
+  .session-title{font-size:15px; font-weight:500; color:var(--t1); margin:0;}
+  .session-meta{font-family:'DM Mono',monospace; font-size:9px; color:var(--t3); margin:6px 0 0; letter-spacing:0.05em;}
+
+  .stat-strip{display:flex; align-items:center; justify-content:space-between; margin-top:14px; padding:10px 12px; border-radius:10px; background:rgba(0,0,0,0.3);}
+  .stat{text-align:center; flex:1;}
+  .stat-n{font-size:18px; font-weight:400; color:var(--t1); margin:0;}
+  .stat-k{font-family:'DM Mono',monospace; font-size:8px; letter-spacing:0.1em; text-transform:uppercase; color:var(--t3); margin:3px 0 0;}
+  .stat-n.lime{color:var(--lime);}
+  .stat-n.red{color:var(--red);}
+  .divider{width:1px; height:26px; background:var(--border);}
+
+  .list-header{display:flex; align-items:center; justify-content:space-between; margin-top:22px; margin-bottom:10px;}
+  .bulk-actions{display:flex; gap:12px;}
+  .bulk-btn{font-family:'DM Mono',monospace; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; background:none; border:none; cursor:pointer;}
+  .bulk-btn.accept{color:var(--lime);}
+  .bulk-btn.clear{color:var(--t2);}
+
+  .player-row{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:12px 14px; margin-bottom:8px;}
+  .player-top{display:flex; align-items:center; justify-content:space-between; gap:10px;}
+  .player-id{display:flex; align-items:center; gap:10px; min-width:0;}
+  .player-name{font-size:13px; font-weight:500; color:var(--t1); margin:0;}
+  .player-sub{display:flex; align-items:center; gap:6px; margin-top:3px;}
+  .rsvp-badge{font-family:'DM Mono',monospace; font-size:8px; letter-spacing:0.08em; text-transform:uppercase; padding:2px 7px; border-radius:999px;}
+  .rsvp-going{background:var(--lime-bg); color:var(--lime); border:1px solid var(--lime-border);}
+  .rsvp-out{background:rgba(239,68,68,0.10); color:var(--red); border:1px solid rgba(239,68,68,0.25);}
+  .rsvp-pending{background:rgba(255,255,255,0.05); color:var(--t3); border:1px solid var(--border);}
+
+  .toggle-group{display:flex; gap:6px; flex-shrink:0;}
+  .toggle-btn{padding:6px 12px; border-radius:8px; font-size:11px; font-weight:500; border:none; cursor:pointer; font-family:'DM Sans',sans-serif;}
+  .toggle-btn.present-on{background:var(--lime); color:#000;}
+  .toggle-btn.present-off{background:rgba(200,242,90,0.15); color:var(--lime);}
+  .toggle-btn.absent-on{background:var(--red); color:#fff;}
+  .toggle-btn.absent-off{background:rgba(239,68,68,0.12); color:var(--red);}
+
+  .from-rsvp{font-family:'DM Mono',monospace; font-size:8px; color:var(--t3); letter-spacing:0.05em; margin:6px 0 0 0; padding-left:0;}
+
+  .sticky-cta{position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:430px; max-width:100%; padding:12px 20px 20px; background:linear-gradient(180deg, rgba(10,10,11,0) 0%, #0A0A0B 35%);}
+  .cta-btn{width:100%; padding:14px; border-radius:12px; border:none; font-size:14px; font-weight:500; cursor:pointer; background:var(--lime); color:#000; font-family:'DM Sans',sans-serif;}
+</style>
+
+<div class="shell">
+  <div class="topbar">
+    <button class="backbtn">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <span class="topbar-title">Attendance</span>
+  </div>
+
+  <div class="session-card">
+    <p class="session-title">Tactical / Finishing Training</p>
+    <p class="session-meta">TUE 12 AUG · 18:00 · City FC Training Ground</p>
+
+    <div class="stat-strip">
+      <div class="stat"><p class="stat-n lime">9</p><p class="stat-k">Present</p></div>
+      <div class="divider"></div>
+      <div class="stat"><p class="stat-n red">2</p><p class="stat-k">Absent</p></div>
+      <div class="divider"></div>
+      <div class="stat"><p class="stat-n">1</p><p class="stat-k">No RSVP</p></div>
+    </div>
+  </div>
+
+  <div class="list-header">
+    <span class="label">SQUAD · 12 PLAYERS</span>
+    <div class="bulk-actions">
+      <button class="bulk-btn accept">ACCEPT ALL RSVPS</button>
+      <button class="bulk-btn clear">RESET</button>
+    </div>
+  </div>
+
+  <!-- Row: RSVP Going, coach kept present (from RSVP, untouched) -->
+  <div class="player-row">
+    <div class="player-top">
+      <div class="player-id">
+        <div>
+          <p class="player-name">Jamie Wilson</p>
+          <div class="player-sub"><span class="rsvp-badge rsvp-going">RSVP: Going</span></div>
+        </div>
+      </div>
+      <div class="toggle-group">
+        <button class="toggle-btn present-on">Present</button>
+        <button class="toggle-btn absent-off">Absent</button>
+      </div>
+    </div>
+    <p class="from-rsvp">· from RSVP</p>
+  </div>
+
+  <!-- Row: RSVP Can't make it, coach kept absent (from RSVP) -->
+  <div class="player-row">
+    <div class="player-top">
+      <div class="player-id">
+        <div>
+          <p class="player-name">Marcus Odei</p>
+          <div class="player-sub"><span class="rsvp-badge rsvp-out">RSVP: Can't make it</span></div>
+        </div>
+      </div>
+      <div class="toggle-group">
+        <button class="toggle-btn present-off">Present</button>
+        <button class="toggle-btn absent-on">Absent</button>
+      </div>
+    </div>
+    <p class="from-rsvp">· from RSVP</p>
+  </div>
+
+  <!-- Row: RSVP Can't make it, but coach OVERRODE to present -->
+  <div class="player-row">
+    <div class="player-top">
+      <div class="player-id">
+        <div>
+          <p class="player-name">Theo Bramwell</p>
+          <div class="player-sub"><span class="rsvp-badge rsvp-out">RSVP: Can't make it</span></div>
+        </div>
+      </div>
+      <div class="toggle-group">
+        <button class="toggle-btn present-on">Present</button>
+        <button class="toggle-btn absent-off">Absent</button>
+      </div>
+    </div>
+    <p class="from-rsvp" style="color:var(--lime); opacity:0.6;">· edited by coach — showed up anyway</p>
+  </div>
+
+  <!-- Row: No RSVP response, coach marking manually -->
+  <div class="player-row">
+    <div class="player-top">
+      <div class="player-id">
+        <div>
+          <p class="player-name">Dev Patel</p>
+          <div class="player-sub"><span class="rsvp-badge rsvp-pending">No RSVP</span></div>
+        </div>
+      </div>
+      <div class="toggle-group">
+        <button class="toggle-btn present-on">Present</button>
+        <button class="toggle-btn absent-off">Absent</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Row: RSVP Going, present -->
+  <div class="player-row">
+    <div class="player-top">
+      <div class="player-id">
+        <div>
+          <p class="player-name">Leo Fontaine</p>
+          <div class="player-sub"><span class="rsvp-badge rsvp-going">RSVP: Going</span></div>
+        </div>
+      </div>
+      <div class="toggle-group">
+        <button class="toggle-btn present-on">Present</button>
+        <button class="toggle-btn absent-off">Absent</button>
+      </div>
+    </div>
+    <p class="from-rsvp">· from RSVP</p>
+  </div>
+
+  <!-- Row: RSVP Going, present -->
+  <div class="player-row">
+    <div class="player-top">
+      <div class="player-id">
+        <div>
+          <p class="player-name">Ollie Sanderson</p>
+          <div class="player-sub"><span class="rsvp-badge rsvp-going">RSVP: Going</span></div>
+        </div>
+      </div>
+      <div class="toggle-group">
+        <button class="toggle-btn present-on">Present</button>
+        <button class="toggle-btn absent-off">Absent</button>
+      </div>
+    </div>
+    <p class="from-rsvp">· from RSVP</p>
+  </div>
+
+  <div style="height:90px;"></div>
+
+  <div class="sticky-cta">
+    <button class="cta-btn">Save attendance</button>
+  </div>
+</div>
