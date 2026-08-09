@@ -11,7 +11,9 @@
   body{background:var(--bg); font-family:'DM Sans',sans-serif; color:var(--t1); margin:0; display:flex; justify-content:center;}
   .shell{width:430px; max-width:100%; min-height:100vh; background:var(--bg); padding:0 20px 100px; position:relative;}
 
-  .header{padding-top:12px; padding-bottom:4px;}
+  .topbar{display:flex; align-items:center; gap:12px; padding:14px 0 2px;}
+  .backbtn{width:34px;height:34px;background:var(--card-elevated);border:1px solid rgba(255,255,255,0.11);border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--t1); flex-shrink:0;}
+  .header{padding-top:2px; padding-bottom:4px;}
   .eyebrow{font-family:'DM Mono',monospace; font-size:9px; letter-spacing:0.12em; text-transform:uppercase; color:var(--t3); margin:0 0 2px;}
   .h1{font-size:22px; font-weight:300; color:var(--t1); margin:0; letter-spacing:-0.02em;}
   .count{font-family:'DM Mono',monospace; font-size:10px; color:var(--t3);}
@@ -75,7 +77,13 @@
 </style>
 
 <div class="shell">
-  <!-- Bottom nav — matches NavBar visual language; Schedule not yet a 5th tab (see trade-off note) -->
+  <!-- Reached via "See all" from PlayerHome's Upcoming Events — not a 5th nav tab (see trade-off note) -->
+  <div class="topbar">
+    <button class="backbtn">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <span class="topbar-title" style="font-size:16px; font-weight:500;">Home</span>
+  </div>
   <div class="header">
     <p class="eyebrow">Player</p>
     <div class="header-row">
