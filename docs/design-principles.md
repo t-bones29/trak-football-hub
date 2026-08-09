@@ -64,8 +64,14 @@ These are new — flagged explicitly per the agent brief, not silently invented:
   interaction model.
 - **Feedback-to-player surface**: reuses the `PointCard` accordion visual language from
   `PlayerFeedback.tsx` (numbered chip, expand/collapse, tinted bank card) but simplified to a single
-  session-level note rather than the match-feedback engine's 3-point AI breakdown — session
-  feedback is one coach-authored note, not a generated multi-point analysis.
+  session-level note rather than the match-feedback engine's 3-point AI breakdown. **Feedback is
+  per-player**, not a single broadcast note to the whole squad — one personalized note per player,
+  consistent with how match/assessment feedback already works.
+- **No rating on training-session feedback.** Per `CoachManual.tsx`: "Training sessions don't
+  generate ratings for players — they're an attendance and workload record." Training-session
+  feedback (this journey) must never show a `BANDS` pill or any rating — that's match-only. This
+  was caught in review after a first wireframe draft included one; flagging explicitly so it isn't
+  silently reintroduced.
 
 ## When a new pattern is genuinely warranted
 
