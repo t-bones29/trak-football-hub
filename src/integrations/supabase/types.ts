@@ -50,14 +50,16 @@ export type Database = {
         Row: {
           appearance: string | null
           attitude: number
+          coach_name_snapshot: string | null
           coach_rating: number | null
-          coach_user_id: string
+          coach_user_id: string | null
           coachability: number
           consistency: number
           created_at: string | null
           flag: string | null
           id: string
           impact: number
+          organization_id: string | null
           physical: number
           session_id: string | null
           spirit: number
@@ -71,14 +73,16 @@ export type Database = {
         Insert: {
           appearance?: string | null
           attitude?: number
+          coach_name_snapshot?: string | null
           coach_rating?: number | null
-          coach_user_id: string
+          coach_user_id?: string | null
           coachability?: number
           consistency?: number
           created_at?: string | null
           flag?: string | null
           id?: string
           impact?: number
+          organization_id?: string | null
           physical?: number
           session_id?: string | null
           spirit?: number
@@ -92,14 +96,16 @@ export type Database = {
         Update: {
           appearance?: string | null
           attitude?: number
+          coach_name_snapshot?: string | null
           coach_rating?: number | null
-          coach_user_id?: string
+          coach_user_id?: string | null
           coachability?: number
           consistency?: number
           created_at?: string | null
           flag?: string | null
           id?: string
           impact?: number
+          organization_id?: string | null
           physical?: number
           session_id?: string | null
           spirit?: number
@@ -123,6 +129,13 @@ export type Database = {
             columns: ["squad_player_id"]
             isOneToOne: false
             referencedRelation: "squad_players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coach_assessments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -181,6 +194,7 @@ export type Database = {
           created_at: string | null
           current_club: string | null
           id: string
+          organization_id: string | null
           team: string | null
           user_id: string
         }
@@ -189,6 +203,7 @@ export type Database = {
           created_at?: string | null
           current_club?: string | null
           id?: string
+          organization_id?: string | null
           team?: string | null
           user_id: string
         }
@@ -197,14 +212,23 @@ export type Database = {
           created_at?: string | null
           current_club?: string | null
           id?: string
+          organization_id?: string | null
           team?: string | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "coach_details_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       coach_sessions: {
         Row: {
-          coach_user_id: string
+          coach_user_id: string | null
           competition: string | null
           created_at: string | null
           id: string
@@ -216,7 +240,7 @@ export type Database = {
           venue: string | null
         }
         Insert: {
-          coach_user_id: string
+          coach_user_id?: string | null
           competition?: string | null
           created_at?: string | null
           id?: string
@@ -228,7 +252,7 @@ export type Database = {
           venue?: string | null
         }
         Update: {
-          coach_user_id?: string
+          coach_user_id?: string | null
           competition?: string | null
           created_at?: string | null
           id?: string
@@ -336,6 +360,131 @@ export type Database = {
           },
         ]
       }
+      organizations: {
+        Row: {
+          admin_user_id: string
+          created_at: string
+          id: string
+          join_code: string
+          logo_url: string | null
+          name: string
+        }
+        Insert: {
+          admin_user_id: string
+          created_at?: string
+          id?: string
+          join_code: string
+          logo_url?: string | null
+          name: string
+        }
+        Update: {
+          admin_user_id?: string
+          created_at?: string
+          id?: string
+          join_code?: string
+          logo_url?: string | null
+          name?: string
+        }
+        Relationships: []
+      }
+      admin_notes: {
+        Row: {
+          admin_user_id: string
+          created_at: string
+          id: string
+          note: string
+          organization_id: string
+          target_coach_user_id: string | null
+          target_squad_player_id: string | null
+          target_type: string
+        }
+        Insert: {
+          admin_user_id: string
+          created_at?: string
+          id?: string
+          note: string
+          organization_id: string
+          target_coach_user_id?: string | null
+          target_squad_player_id?: string | null
+          target_type: string
+        }
+        Update: {
+          admin_user_id?: string
+          created_at?: string
+          id?: string
+          note?: string
+          organization_id?: string
+          target_coach_user_id?: string | null
+          target_squad_player_id?: string | null
+          target_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_notes_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admin_notes_target_squad_player_id_fkey"
+            columns: ["target_squad_player_id"]
+            isOneToOne: false
+            referencedRelation: "squad_players"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      staff_compliance: {
+        Row: {
+          coach_user_id: string
+          dbs_expiry: string | null
+          dbs_status: string | null
+          first_aid_expiry: string | null
+          id: string
+          license_expiry: string | null
+          license_level: string | null
+          notes: string | null
+          organization_id: string
+          safeguarding_completed: boolean
+          updated_at: string
+        }
+        Insert: {
+          coach_user_id: string
+          dbs_expiry?: string | null
+          dbs_status?: string | null
+          first_aid_expiry?: string | null
+          id?: string
+          license_expiry?: string | null
+          license_level?: string | null
+          notes?: string | null
+          organization_id: string
+          safeguarding_completed?: boolean
+          updated_at?: string
+        }
+        Update: {
+          coach_user_id?: string
+          dbs_expiry?: string | null
+          dbs_status?: string | null
+          first_aid_expiry?: string | null
+          id?: string
+          license_expiry?: string | null
+          license_level?: string | null
+          notes?: string | null
+          organization_id?: string
+          safeguarding_completed?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_compliance_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       parent_invites: {
         Row: {
           created_at: string | null
@@ -392,39 +541,6 @@ export type Database = {
           id?: string
           position?: string | null
           shirt_number?: number | null
-          user_id?: string
-        }
-        Relationships: []
-      }
-      player_goals: {
-        Row: {
-          category: string | null
-          completed: boolean | null
-          created_at: string | null
-          current_value: number | null
-          goal_type: string
-          id: string
-          target_value: number
-          user_id: string
-        }
-        Insert: {
-          category?: string | null
-          completed?: boolean | null
-          created_at?: string | null
-          current_value?: number | null
-          goal_type: string
-          id?: string
-          target_value: number
-          user_id: string
-        }
-        Update: {
-          category?: string | null
-          completed?: boolean | null
-          created_at?: string | null
-          current_value?: number | null
-          goal_type?: string
-          id?: string
-          target_value?: number
           user_id?: string
         }
         Relationships: []
@@ -487,28 +603,34 @@ export type Database = {
         Row: {
           award_type: string
           awarded_for: string | null
-          coach_user_id: string
+          coach_name_snapshot: string | null
+          coach_user_id: string | null
           created_at: string | null
           id: string
           note: string | null
+          organization_id: string | null
           squad_player_id: string
         }
         Insert: {
           award_type: string
           awarded_for?: string | null
-          coach_user_id: string
+          coach_name_snapshot?: string | null
+          coach_user_id?: string | null
           created_at?: string | null
           id?: string
           note?: string | null
+          organization_id?: string | null
           squad_player_id: string
         }
         Update: {
           award_type?: string
           awarded_for?: string | null
-          coach_user_id?: string
+          coach_name_snapshot?: string | null
+          coach_user_id?: string | null
           created_at?: string | null
           id?: string
           note?: string | null
+          organization_id?: string | null
           squad_player_id?: string
         }
         Relationships: [
@@ -517,6 +639,13 @@ export type Database = {
             columns: ["squad_player_id"]
             isOneToOne: false
             referencedRelation: "squad_players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recognition_awards_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -566,33 +695,39 @@ export type Database = {
       squad_players: {
         Row: {
           age: number | null
-          coach_user_id: string
+          age_group: string | null
+          coach_user_id: string | null
           created_at: string | null
           id: string
           linked_player_id: string | null
           player_name: string
           position: string | null
           shirt_number: number | null
+          status: string
         }
         Insert: {
           age?: number | null
-          coach_user_id: string
+          age_group?: string | null
+          coach_user_id?: string | null
           created_at?: string | null
           id?: string
           linked_player_id?: string | null
           player_name: string
           position?: string | null
           shirt_number?: number | null
+          status?: string
         }
         Update: {
           age?: number | null
-          coach_user_id?: string
+          age_group?: string | null
+          coach_user_id?: string | null
           created_at?: string | null
           id?: string
           linked_player_id?: string | null
           player_name?: string
           position?: string | null
           shirt_number?: number | null
+          status?: string
         }
         Relationships: []
       }
@@ -662,6 +797,7 @@ export type Database = {
         Returns: {
           created_at: string
           id: string
+          invite_token: string
           parent_email: string
           player_user_id: string
           status: string
@@ -672,9 +808,60 @@ export type Database = {
         Returns: Database["public"]["Enums"]["user_role"]
       }
       is_club_admin: { Args: never; Returns: boolean }
+      is_coach: { Args: never; Returns: boolean }
       link_parent_to_players_by_email: {
         Args: { p_email: string }
         Returns: number
+      }
+      create_parent_invite: {
+        Args: { p_email: string }
+        Returns: {
+          id: string
+          invite_token: string
+          parent_email: string
+          status: string
+        }[]
+      }
+      remove_coach_from_org: {
+        Args: { p_coach_user_id: string }
+        Returns: undefined
+      }
+      provision_my_profile: {
+        Args: { p: Json }
+        Returns: Json
+      }
+      link_player_to_coach: {
+        Args: { p_code: string }
+        Returns: string
+      }
+      generate_unique_code: {
+        Args: { p_kind: string }
+        Returns: string
+      }
+      join_organization: {
+        Args: { p_code: string }
+        Returns: string
+      }
+      get_org_id_by_join_code: {
+        Args: { p_code: string }
+        Returns: string
+      }
+      my_organization_id: { Args: never; Returns: string }
+      coach_in_my_org: {
+        Args: { p_coach_user_id: string }
+        Returns: boolean
+      }
+      player_in_my_org: {
+        Args: { p_player_user_id: string }
+        Returns: boolean
+      }
+      squad_player_in_my_org: {
+        Args: { p_squad_player_id: string; p_coach_user_id: string; p_status: string }
+        Returns: boolean
+      }
+      squad_player_is_my_child: {
+        Args: { p_squad_player_id: string }
+        Returns: boolean
       }
       log_match_for_player: {
         Args: {

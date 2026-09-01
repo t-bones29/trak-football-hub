@@ -48,8 +48,10 @@ export default function ParentHome() {
           .order('created_at', { ascending: false }).limit(1)
         if (assessments?.length) {
           setAssessment(assessments[0])
-          const { data: coachProfile } = await supabase.from('profiles').select('full_name').eq('user_id', assessments[0].coach_user_id).maybeSingle()
-          if (coachProfile) setCoachName(coachProfile.full_name)
+          if (assessments[0].coach_user_id) {
+            const { data: coachProfile } = await supabase.from('profiles').select('full_name').eq('user_id', assessments[0].coach_user_id).maybeSingle()
+            if (coachProfile) setCoachName(coachProfile.full_name)
+          }
         }
 
         const { data: awards } = await supabase.from('recognition_awards')

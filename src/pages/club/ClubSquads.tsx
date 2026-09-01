@@ -111,7 +111,7 @@ export default function ClubSquads() {
         id: sp.id,
         name: sp.player_name,
         position: sp.position || '—',
-        ageGroup: (sp as any).age_group ?? (sp.age != null ? String(sp.age) : '—'),
+        ageGroup: sp.age_group ?? (sp.age != null ? String(sp.age) : '—'),
         coachName: sp.coach_user_id ? (coachNameMap[sp.coach_user_id] || 'Coach') : 'No coach',
         latestBand: bandCfg.word,
         latestBandColor: bandCfg.color,

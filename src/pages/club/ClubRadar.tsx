@@ -79,7 +79,7 @@ export default function ClubRadar() {
 
     if (!squadPlayers) { setLoading(false); return }
 
-    const coachIds = [...new Set(squadPlayers.map(s => s.coach_user_id))]
+    const coachIds = [...new Set(squadPlayers.map(s => s.coach_user_id).filter((id): id is string => !!id))]
 
     // 5. Fetch coach names + team in parallel
     const [{ data: profiles }, { data: coachDetails }] = await Promise.all([
@@ -106,8 +106,8 @@ export default function ClubRadar() {
           id: sp.id,
           name: sp.player_name,
           position: sp.position || '—',
-          team: coachTeamMap[sp.coach_user_id] || '—',
-          coachName: coachNameMap[sp.coach_user_id] || 'Coach',
+          team: (sp.coach_user_id && coachTeamMap[sp.coach_user_id]) || '—',
+          coachName: (sp.coach_user_id && coachNameMap[sp.coach_user_id]) || 'Coach',
           avgScore: q.avg,
           assessmentCount: q.count,
           band: bandCfg.word,

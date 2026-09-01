@@ -26,7 +26,7 @@ export default function CoachAddPlayer() {
       shirt_number: shirtNumber ? Number(shirtNumber) : null,
       age_group: ageGroup || null,
       status: 'active',
-    } as any)
+    })
     setSaving(false)
     if (error) {
       toast.error(`Couldn't add player: ${error.message}`)

@@ -84,7 +84,7 @@ export default function ParentAlerts() {
           for (const a of assessments) {
             const aDate = new Date(a.created_at ?? '')
             const avgScore = (a.work_rate + a.tactical + a.attitude + a.technical + a.physical + a.coachability) / 6
-            const coachName = coachMap[a.coach_user_id] || 'Coach'
+            const coachName = coachMap[a.coach_user_id ?? ''] || 'Coach'
             generated.push({
               id: `assess-${a.id}`,
               type: 'coach_assessment',
@@ -103,7 +103,7 @@ export default function ParentAlerts() {
           for (const aw of awards ?? []) {
             const awDate = new Date(aw.created_at ?? '')
             const label = AWARD_LABELS[aw.award_type] ?? 'Recognition'
-            const coachName = coachMap[aw.coach_user_id] || 'Coach'
+            const coachName = coachMap[aw.coach_user_id ?? ''] || 'Coach'
             generated.push({
               id: `award-${aw.id}`,
               type: 'recognition',

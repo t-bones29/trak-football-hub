@@ -66,6 +66,7 @@ export default function ClubCoaches() {
       .in('coach_user_id', coachIds)
     const playerCountMap: Record<string, number> = {}
     for (const sp of squadPlayers ?? []) {
+      if (!sp.coach_user_id) continue
       playerCountMap[sp.coach_user_id] = (playerCountMap[sp.coach_user_id] || 0) + 1
     }
 
@@ -81,7 +82,7 @@ export default function ClubCoaches() {
 
     // Build squad_player → coach map
     const spCoachMap: Record<string, string> = {}
-    for (const sp of squadPlayers ?? []) { spCoachMap[sp.id] = sp.coach_user_id }
+    for (const sp of squadPlayers ?? []) { if (sp.coach_user_id) spCoachMap[sp.id] = sp.coach_user_id }
 
     // Count assessments + find last date per coach
     const monthCountMap: Record<string, number> = {}

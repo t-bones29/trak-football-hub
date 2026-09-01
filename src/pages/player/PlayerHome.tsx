@@ -119,8 +119,10 @@ export default function PlayerHome() {
         if (assessments?.length) {
           const latest = assessments[0]
           setCoachAssessment(latest)
-          const { data: cp } = await supabase.from('profiles').select('full_name').eq('user_id', latest.coach_user_id).maybeSingle()
-          if (cp) setCoachName(cp.full_name)
+          if (latest.coach_user_id) {
+            const { data: cp } = await supabase.from('profiles').select('full_name').eq('user_id', latest.coach_user_id).maybeSingle()
+            if (cp) setCoachName(cp.full_name)
+          }
           // Check if the coach left improvement notes for this assessment
           const { data: noteRow, error: noteError } = await supabase.from('coach_assessment_notes')
             .select('note').eq('assessment_id', latest.id).maybeSingle()
