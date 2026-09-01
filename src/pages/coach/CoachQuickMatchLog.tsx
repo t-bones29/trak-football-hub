@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from '@/contexts/AuthContext'
 import { MobileShell } from '@/components/trak'
 import { computeMatchScore } from '@/lib/rating-engine'
+import { mapPositionToRatingKey, defaultAttendanceSet } from '@/lib/match-log'
 
 /**
  * Quick Match Log — 1-minute capture at full-time.
@@ -38,7 +39,7 @@ export default function CoachQuickMatchLog() {
         // squad selected and let the coach deselect absentees, rather than
         // making them tap every player who attended (mirrors the Quick Assess
         // fix: start from the likely case, not a neutral default).
-        setAttended(new Set(players.map(p => p.id)))
+        setAttended(defaultAttendanceSet(players))
       })
   }, [user])
 
@@ -96,13 +97,7 @@ export default function CoachQuickMatchLog() {
       const linkedPlayers = attendedPlayers.filter(p => p.linked_player_id)
       if (linkedPlayers.length > 0) {
         const matchRows = linkedPlayers.map(p => {
-          // Map squad position string to rating-engine position key
-          const posRaw = (p.position || '').toLowerCase()
-          const pos =
-            posRaw.includes('goalkeeper') || posRaw === 'gk' ? 'gk'
-            : posRaw.includes('defender') || posRaw === 'def' || posRaw === 'cb' || posRaw === 'lb' || posRaw === 'rb' ? 'def'
-            : posRaw.includes('attacker') || posRaw === 'att' || posRaw === 'cf' || posRaw === 'st' || posRaw === 'lw' || posRaw === 'rw' ? 'att'
-            : 'mid'
+          const pos = mapPositionToRatingKey(p.position)
 
           const computed_rating = computeMatchScore({
             position: pos,
