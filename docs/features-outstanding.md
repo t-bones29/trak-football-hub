@@ -75,10 +75,9 @@ character feature and the legal/billing layer — are gated on the psychologist 
 conversations rather than on engineering.
 
 Both product questions are now settled — age groups start at U13, and `player_goals` is dropped.
-The most valuable unblocked work is **continuing the coach friction audit** (match logging and
-add-player), because that targets the biggest risk to the business rather than to the codebase.
-After that: test coverage, untested backups, bundle size, and the absolute `og:image` URL once the
-production domain is known.
+The coach friction audit is now complete for match logging and add-player (see above) — **not yet
+verified live**. Next most valuable: test coverage, untested backups, bundle size, and the absolute
+`og:image` URL once the production domain is known.
 
 ## Security review — completed
 
@@ -129,7 +128,23 @@ indistinguishable from a considered one. Sliders now start from that player's pr
 assessment, so the coach moves only what changed. No extra query: the scores were already being
 fetched and discarded.
 
-**Not yet measured:** match logging, and the add-player flow.
+**Measured and fixed — match logging (`CoachQuickMatchLog`):**
+- Attendance defaulted to nobody selected, even though "everyone who showed up played" is the
+  common case — the coach had to tap every attendee instead of deselecting the rare absentee.
+  Now defaults to the whole squad selected.
+- **Silent failure, unverified live:** neither the `session_attendance` insert nor the per-player
+  `log_match_for_player` RPC calls checked their `error` result — a failed write still showed
+  "Match logged." Now both are checked and a failure surfaces as a toast naming how many player
+  records didn't save, rather than a false success.
+- 18 sequential `await`s (one RPC call per linked player) replaced with `Promise.all`, so a full
+  squad no longer waits on 18 round-trips one at a time.
+- Not verified live — no Supabase credentials were available in this session. Needs exercising
+  against the real database, same as every other item in this document, before being trusted.
+
+**Measured, no fix needed — add-player (`CoachAddPlayer`):** already minimal — name, one position
+tap, one age-group tap, optional shirt number, save. No meaningful friction found.
+
+**Not yet measured:** nothing remaining in this pair.
 
 ### Recently closed
 

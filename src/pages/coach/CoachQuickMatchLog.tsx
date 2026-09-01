@@ -31,7 +31,15 @@ export default function CoachQuickMatchLog() {
     supabase.from('squad_players').select('id, player_name, linked_player_id, position, age')
       .eq('coach_user_id', user.id)
       .order('player_name')
-      .then(({ data }) => setSquad(data || []))
+      .then(({ data }) => {
+        const players = data || []
+        setSquad(players)
+        // Most players who show up to a match play in it — default to the whole
+        // squad selected and let the coach deselect absentees, rather than
+        // making them tap every player who attended (mirrors the Quick Assess
+        // fix: start from the likely case, not a neutral default).
+        setAttended(new Set(players.map(p => p.id)))
+      })
   }, [user])
 
   const togglePlayer = (id: string) => {
@@ -70,6 +78,8 @@ export default function CoachQuickMatchLog() {
       return
     }
 
+    let failedCount = 0
+
     if (attended.size > 0) {
       const attendedPlayers = squad.filter(p => attended.has(p.id))
 
@@ -79,7 +89,8 @@ export default function CoachQuickMatchLog() {
         squad_player_id: p.id,
         status: 'present',
       }))
-      await supabase.from('session_attendance').insert(attendanceRows)
+      const { error: attendanceError } = await supabase.from('session_attendance').insert(attendanceRows)
+      if (attendanceError) failedCount += attendedPlayers.length
 
       // matches rows for every linked player
       const linkedPlayers = attendedPlayers.filter(p => p.linked_player_id)
@@ -124,8 +135,13 @@ export default function CoachQuickMatchLog() {
         // Direct insert is blocked by RLS (user_id ≠ coach's auth.uid()).
         // Use the SECURITY DEFINER RPC which verifies the coach→player link
         // before writing, so the row actually reaches the player's match history.
-        for (const row of matchRows) {
-          await supabase.rpc('log_match_for_player', {
+        // Fired in parallel rather than awaited one at a time — for an 18-player
+        // squad, a sequential loop is up to 18 round-trips before the coach sees
+        // anything. Each result's error is checked: a silently swallowed failure
+        // here means a coach believes a match is logged when a player never
+        // actually gets it, the exact failure mode this app has hit before.
+        const results = await Promise.all(matchRows.map(row =>
+          supabase.rpc('log_match_for_player', {
             p_user_id:         row.linked_player_id,
             p_opponent:        row.opponent,
             p_team_score:      row.team_score,
@@ -142,12 +158,17 @@ export default function CoachQuickMatchLog() {
             p_self_rating:     'Average',
             p_computed_rating: row.computed_rating,
           })
-        }
+        ))
+        failedCount += results.filter(r => r.error).length
       }
     }
 
-    toast.success('Match logged')
     setSaving(false)
+    if (failedCount > 0) {
+      toast.error(`Match saved, but ${failedCount} player${failedCount === 1 ? "'s record" : " records"} failed to save — check their match history and re-log if missing.`)
+    } else {
+      toast.success('Match logged')
+    }
     navigate('/coach/sessions/list')
   }
 
