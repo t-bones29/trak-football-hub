@@ -1,4 +1,5 @@
 import { type Band } from '@/lib/clubMock'
+import { scoreToBand } from '@/lib/rating-engine'
 
 export const BAND_COLORS: Record<Band, string> = {
   Exceptional: '#C8F25A',
@@ -18,13 +19,11 @@ export const SELF_RATING_BAND: Record<string, Band> = {
   poor: 'Mixed',
 }
 
-// Map a 1–10 coach category score to a band word
+// Map a 1–10 coach category score to a band word.
+// Delegates to the canonical scoreToBand rather than a separate threshold
+// ladder — this used to have its own (drifted) thresholds, so the same
+// score could show as "Mixed" on the Evolution Card but "Developing" here.
 export function categoryScoreToBand(score: number): Band {
-  if (score >= 9) return 'Exceptional'
-  if (score >= 8) return 'Standout'
-  if (score >= 7) return 'Good'
-  if (score >= 6) return 'Steady'
-  if (score >= 5) return 'Mixed'
-  if (score >= 4) return 'Developing'
-  return 'Difficult'
+  const band = scoreToBand(score)
+  return (band.charAt(0).toUpperCase() + band.slice(1)) as Band
 }
